@@ -5,6 +5,9 @@ import { useTelemetryContext } from "@/context/TelemetryContext";
 import { ControlPanel } from "./ControlPanel";
 import { StatusBadge, BadgeStatus } from "./StatusBadge";
 import { Card, CardHeader, CardContent } from "./Card";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTheme } from "@/context/ThemeContext";
 
 interface DashboardShellProps {
   mode: "biotech" | "automotive";
@@ -12,6 +15,11 @@ interface DashboardShellProps {
   visualCards: React.ReactNode;
   sysStatus: { status: BadgeStatus; text: string };
 }
+
+const CATEGORIES = [
+  { id: "biotech" as const, name: "Biotech", path: "/biotech", icon: "🔬" },
+  { id: "automotive" as const, name: "Automotive", path: "/automotive", icon: "🏎️" },
+];
 
 export function DashboardShell({
   mode,
@@ -35,6 +43,10 @@ export function DashboardShell({
     totalPacketsCount,
   } = useTelemetryContext();
 
+  const { theme, toggleTheme } = useTheme();
+  const pathname = usePathname();
+  const currentMode: "biotech" | "automotive" = pathname.includes("automotive") ? "automotive" : "biotech";
+
   const [packetCount, setPacketCount] = useState(0);
 
   useEffect(() => {
@@ -55,16 +67,49 @@ export function DashboardShell({
   return (
     <main className="flex-1 w-full min-h-screen bg-bg-primary text-text-primary px-4 py-6 md:px-8 grid-scan flex flex-col justify-between selection:bg-brand-primary/20">
       {/* Top Header Navigation */}
-      <header className="border-b border-border-custom pb-4 mb-6">
-        <div className="flex items-center space-x-3">
-          <span className={`h-3 w-3 ${dotColorClass} rounded-full animate-pulse-glow`} />
-          <h1 className="text-xl font-black uppercase tracking-widest font-mono text-text-primary">
-            BioStream <span className={slashColorClass}>//</span> Telemetry
-          </h1>
+      <header className="border-b border-border-custom pb-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div className="flex items-center space-x-3">
+            <span className={`h-3 w-3 ${dotColorClass} rounded-full animate-pulse-glow`} />
+            <h1 className="text-xl font-black uppercase tracking-widest font-mono text-text-primary">
+              Telemetry <span className={slashColorClass}>//</span> Dashboard
+            </h1>
+          </div>
+          <p className="text-[10px] text-text-secondary/80 font-mono uppercase mt-1">
+            Diagnostic Visualization &bull; Version 1.0.0
+          </p>
         </div>
-        <p className="text-[10px] text-text-secondary/80 font-mono uppercase mt-1">
-          Diagnostic Instrumentation Casing &bull; Version 1.1.0-Beta
-        </p>
+
+        {/* Top Navbar Menu & Theme Switcher */}
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center p-1 bg-bg-secondary rounded border border-border-custom shadow-sm">
+            {CATEGORIES.map((cat) => {
+              const isActive = currentMode === cat.id;
+              const activeColorClass = cat.id === "biotech" ? "text-brand-primary border-brand-primary/20 bg-bg-primary" : "text-brand-secondary border-brand-secondary/20 bg-bg-primary";
+              return (
+                <Link
+                  key={cat.id}
+                  href={cat.path}
+                  className={`px-3 py-1.5 rounded font-mono text-[9px] uppercase font-bold tracking-wider transition cursor-pointer text-center flex items-center justify-center space-x-1.5 border border-transparent ${isActive
+                    ? `${activeColorClass} shadow-sm border`
+                    : "text-text-secondary/70 hover:text-text-primary"
+                    }`}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded border border-border-custom bg-bg-secondary hover:bg-bg-primary text-[10px] font-mono uppercase tracking-wider text-text-secondary hover:text-text-primary transition cursor-pointer shadow-sm"
+            title="Toggle Theme"
+          >
+            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          </button>
+        </div>
       </header>
 
       {/* Main Grid Layout */}

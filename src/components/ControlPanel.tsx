@@ -1,8 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardContent } from "./Card";
-import { useTheme } from "@/context/ThemeContext";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 
 interface ControlPanelProps {
   isConnected: boolean;
@@ -26,11 +24,6 @@ interface ControlPanelProps {
   onToggleChannel: (channel: "temp" | "ph" | "oxygen" | "pressure" | "rpm" | "speed" | "throttle" | "brake") => void;
 }
 
-const CATEGORIES = [
-  { id: "biotech" as const, name: "Biotech", path: "/biotech", icon: "🔬" },
-  { id: "automotive" as const, name: "Automotive", path: "/automotive", icon: "🏎️" },
-];
-
 export function ControlPanel({
   isConnected,
   onToggleConnection,
@@ -43,7 +36,6 @@ export function ControlPanel({
   activeChannels,
   onToggleChannel,
 }: ControlPanelProps) {
-  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const currentMode: "biotech" | "automotive" = pathname.includes("automotive") ? "automotive" : "biotech";
 
@@ -53,46 +45,9 @@ export function ControlPanel({
         <span className="font-mono text-xs font-bold uppercase tracking-widest text-text-primary">
           System Controller
         </span>
-        <button
-          onClick={toggleTheme}
-          className="p-1.5 rounded border border-border-custom hover:bg-bg-primary text-[10px] font-mono uppercase tracking-wider text-text-secondary hover:text-text-primary transition cursor-pointer"
-          title="Toggle Theme"
-        >
-          {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
-        </button>
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Toggle Mode Link Buttons */}
-        <div className="space-y-2">
-          <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary">
-            Telemetry Mode
-          </label>
-          <div 
-            className="grid gap-2 p-1 bg-bg-primary rounded border border-border-custom"
-            style={{ gridTemplateColumns: `repeat(${CATEGORIES.length}, minmax(0, 1fr))` }}
-          >
-            {CATEGORIES.map((cat) => {
-              const isActive = currentMode === cat.id;
-              const activeColorClass = cat.id === "biotech" ? "text-brand-primary" : "text-brand-secondary";
-              return (
-                <Link
-                  key={cat.id}
-                  href={cat.path}
-                  className={`py-1.5 rounded font-mono text-[9px] uppercase font-bold tracking-wider transition cursor-pointer text-center flex items-center justify-center space-x-1 ${
-                    isActive
-                      ? `bg-bg-secondary ${activeColorClass} shadow-sm border border-border-custom/50`
-                      : "text-text-secondary/70 hover:text-text-primary"
-                  }`}
-                >
-                  <span>{cat.icon}</span>
-                  <span>{cat.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Connection Toggle */}
         <div className="space-y-2">
           <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary">

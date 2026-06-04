@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BioStream // Biotech Telemetry Dashboard",
-  description: "High-performance real-time telemetry instrumentation dashboard simulating medical bioreactor and MCU streams.",
+  title: "Telemetry Dashboard",
+  description: "High-performance real-time telemetry instrumentation dashboard simulating medical and MCU streams.",
 };
 
 export default function RootLayout({
