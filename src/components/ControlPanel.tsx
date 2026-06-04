@@ -1,6 +1,8 @@
 import React from "react";
 import { Card, CardHeader, CardContent } from "./Card";
 import { useTheme } from "@/context/ThemeContext";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 interface ControlPanelProps {
   isConnected: boolean;
@@ -22,9 +24,12 @@ interface ControlPanelProps {
     brake: boolean;
   };
   onToggleChannel: (channel: "temp" | "ph" | "oxygen" | "pressure" | "rpm" | "speed" | "throttle" | "brake") => void;
-  mode: "biotech" | "automotive";
-  onModeChange: (m: "biotech" | "automotive") => void;
 }
+
+const CATEGORIES = [
+  { id: "biotech" as const, name: "Biotech", path: "/biotech", icon: "🔬" },
+  { id: "automotive" as const, name: "Automotive", path: "/automotive", icon: "🏎️" },
+];
 
 export function ControlPanel({
   isConnected,
@@ -37,10 +42,10 @@ export function ControlPanel({
   onDropRateChange,
   activeChannels,
   onToggleChannel,
-  mode,
-  onModeChange,
 }: ControlPanelProps) {
   const { theme, toggleTheme } = useTheme();
+  const pathname = usePathname();
+  const currentMode: "biotech" | "automotive" = pathname.includes("automotive") ? "automotive" : "biotech";
 
   return (
     <Card className="h-full">
@@ -58,32 +63,33 @@ export function ControlPanel({
       </CardHeader>
 
       <CardContent className="space-y-6">
-        {/* Toggle Mode Segmented Buttons */}
+        {/* Toggle Mode Link Buttons */}
         <div className="space-y-2">
           <label className="block text-[10px] font-mono uppercase tracking-wider text-text-secondary">
             Telemetry Mode
           </label>
-          <div className="grid grid-cols-2 gap-2 p-1 bg-bg-primary rounded border border-border-custom">
-            <button
-              onClick={() => onModeChange("biotech")}
-              className={`py-1.5 rounded font-mono text-[9px] uppercase font-bold tracking-wider transition cursor-pointer ${
-                mode === "biotech"
-                  ? "bg-bg-secondary text-brand-primary shadow-sm border border-border-custom/50"
-                  : "text-text-secondary/70 hover:text-text-primary"
-              }`}
-            >
-              🔬 Biotech
-            </button>
-            <button
-              onClick={() => onModeChange("automotive")}
-              className={`py-1.5 rounded font-mono text-[9px] uppercase font-bold tracking-wider transition cursor-pointer ${
-                mode === "automotive"
-                  ? "bg-bg-secondary text-brand-secondary shadow-sm border border-border-custom/50"
-                  : "text-text-secondary/70 hover:text-text-primary"
-              }`}
-            >
-              🏎️ Automotive
-            </button>
+          <div 
+            className="grid gap-2 p-1 bg-bg-primary rounded border border-border-custom"
+            style={{ gridTemplateColumns: `repeat(${CATEGORIES.length}, minmax(0, 1fr))` }}
+          >
+            {CATEGORIES.map((cat) => {
+              const isActive = currentMode === cat.id;
+              const activeColorClass = cat.id === "biotech" ? "text-brand-primary" : "text-brand-secondary";
+              return (
+                <Link
+                  key={cat.id}
+                  href={cat.path}
+                  className={`py-1.5 rounded font-mono text-[9px] uppercase font-bold tracking-wider transition cursor-pointer text-center flex items-center justify-center space-x-1 ${
+                    isActive
+                      ? `bg-bg-secondary ${activeColorClass} shadow-sm border border-border-custom/50`
+                      : "text-text-secondary/70 hover:text-text-primary"
+                  }`}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.name}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
 
@@ -174,7 +180,7 @@ export function ControlPanel({
             Diagnostic Channels
           </label>
           <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
-            {mode === "biotech" ? (
+            {currentMode === "biotech" ? (
               // Biotech Channels
               (["temp", "ph", "oxygen", "pressure"] as const).map((channel) => {
                 const label =

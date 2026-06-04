@@ -19,8 +19,8 @@ export function TelemetryBar({
   const activeSegments = Math.round((percentage / 100) * numSegments);
 
   return (
-    <Card className="py-2 px-4 select-none">
-      <div className="flex flex-col space-y-1.5">
+    <Card className="py-2 px-4 select-none h-full flex flex-col justify-center min-h-[170px]">
+      <div className="flex flex-col space-y-1.5 w-full">
         {/* Title and Percentage Display */}
         <div className="flex justify-between items-baseline font-mono text-[9px] uppercase tracking-wider">
           <span className="text-text-secondary/70">{title}</span>
