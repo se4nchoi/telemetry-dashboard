@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+:root {
+  /* Biotech Light Theme (Clinical-White / Sterile Instrument Style) */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --border-color: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  
+  --brand-primary: #0284c7;     /* Clinical Sky Blue */
+  --brand-secondary: #0d9488;   /* Biotech Teal */
+  --brand-success: #059669;     /* Bio-emerald Green */
+  --brand-warning: #d97706;     /* Bio-amber Warning */
+  --brand-danger: #e11d48;      /* Bio-crimson Danger */
+  --brand-glow: rgba(2, 132, 199, 0.15);
+}
+
+.dark {
+  /* Biotech Dark Theme (Bio-Obsidian / Neon Instrument Style) */
+  --bg-primary: #07090e;        /* Deep obsidian laboratory environment */
+  --bg-secondary: #0f131c;      /* Glass/matte instrument casing */
+  --border-color: #1e293b;      /* Dark diagnostic slate */
+  --text-primary: #f8fafc;      /* Neon bright readout */
+  --text-secondary: #94a3b8;    /* Sub-readout medical metrics */
+  
+  --brand-primary: #00f5d4;     /* Bioluminescent Glowing Cyan */
+  --brand-secondary: #38bdf8;   /* Electro-Ice Blue */
+  --brand-success: #10b981;     /* High-vis Bio-emerald */
+  --brand-warning: #f59e0b;     /* High-vis Amber */
+  --brand-danger: #f43f5e;      /* Critical Bio-hazard Crimson */
+  --brand-glow: rgba(0, 245, 212, 0.2);
+}
+
+@theme {
+  /* Register custom CSS variable mapping for TailwindCSS utility classes */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-border-custom: var(--border-color);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-success: var(--brand-success);
+  --color-brand-warning: var(--brand-warning);
+  --color-brand-danger: var(--brand-danger);
+  
+  --shadow-glow: 0 0 15px var(--brand-glow);
+  --shadow-glow-sm: 0 0 8px var(--brand-glow);
+  
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Monospace utility for numbers/instrument readouts */
+.font-readout {
+  font-family: var(--font-mono), monospace;
+}
+
+/* Biotech grid scanner scanning grid lines */
+.grid-scan {
+  background-size: 20px 20px;
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+}
+
+.dark .grid-scan {
+  background-image: 
+    linear-gradient(to right, rgba(0, 245, 212, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 245, 212, 0.02) 1px, transparent 1px);
+}
+
+/* Neon Glow utilities */
+.glow-border {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 10px var(--brand-glow);
+}
+
+/* Glowing pulse animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 10px var(--brand-glow);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.96);
+    box-shadow: 0 0 2px var(--brand-glow);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
