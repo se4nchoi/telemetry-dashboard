@@ -47,15 +47,7 @@ export function DashboardShell({
   const pathname = usePathname();
   const currentMode: "biotech" | "automotive" = pathname.includes("automotive") ? "automotive" : "biotech";
 
-  const [packetCount, setPacketCount] = useState(0);
 
-  useEffect(() => {
-    if (!isConnected) return;
-    const interval = setInterval(() => {
-      setPacketCount((c) => c + 1);
-    }, 1000 / frequency);
-    return () => clearInterval(interval);
-  }, [isConnected, frequency]);
 
   const totalAttempted = totalPacketsCount + missedPacketsCount;
   const lossRatio = totalAttempted > 0 ? (missedPacketsCount / totalAttempted) * 100 : 0;
@@ -159,7 +151,7 @@ export function DashboardShell({
 
                   <div className="border border-border-custom/50 rounded px-2 py-0.5 bg-bg-primary flex items-center space-x-1.5">
                     <span className="text-text-secondary/60">Frames:</span>
-                    <span className="font-semibold text-brand-primary font-readout">{packetCount}</span>
+                    <span className="font-semibold text-brand-primary font-readout">{totalPacketsCount}</span>
                   </div>
 
                   <div className="border border-border-custom/50 rounded px-2 py-0.5 bg-bg-primary flex items-center space-x-1.5">
