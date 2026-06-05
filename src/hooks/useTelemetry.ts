@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { BadgeStatus } from "@/components/StatusBadge";
+import { getStats } from "@/utils/telemetryHelpers";
 
 export interface LogEntry {
   id: string;
@@ -55,27 +56,33 @@ export function useTelemetry() {
     brake: true,
   });
 
-  const [metrics, setMetrics] = useState<TelemetryMetrics>({
-    temp: 37.0,
-    ph: 7.40,
-    oxygen: 95.0,
-    pressure: 120.0,
-    rpm: 1200,
-    speed: 0,
-    throttle: 0,
-    brake: 0,
+  const [state, setState] = useState<{
+    metrics: TelemetryMetrics;
+    history: TelemetryHistory;
+  }>({
+    metrics: {
+      temp: 37.0,
+      ph: 7.40,
+      oxygen: 95.0,
+      pressure: 120.0,
+      rpm: 1200,
+      speed: 0,
+      throttle: 0,
+      brake: 0,
+    },
+    history: {
+      temp: Array(50).fill(37.0),
+      ph: Array(50).fill(7.40),
+      oxygen: Array(50).fill(95.0),
+      pressure: Array(50).fill(120.0),
+      rpm: Array(50).fill(1200),
+      speed: Array(50).fill(0),
+      throttle: Array(50).fill(0),
+      brake: Array(50).fill(0),
+    },
   });
 
-  const [history, setHistory] = useState<TelemetryHistory>({
-    temp: Array(50).fill(37.0),
-    ph: Array(50).fill(7.40),
-    oxygen: Array(50).fill(95.0),
-    pressure: Array(50).fill(120.0),
-    rpm: Array(50).fill(1200),
-    speed: Array(50).fill(0),
-    throttle: Array(50).fill(0),
-    brake: Array(50).fill(0),
-  });
+  const { metrics, history } = state;
 
   // Keep references to refs to avoid resetting the simulation loop on slider updates
   const frequencyRef = useRef(frequency);
@@ -173,31 +180,34 @@ export function useTelemetry() {
       }
       lastPacketIdRef.current = packetId;
 
-      setMetrics((prev) => {
+      setState((prev) => {
+        const prevMetrics = prev.metrics;
+        const prevHistory = prev.history;
+
         // --- Biotech Simulation ---
         // Temperature: slow thermal drift
         const baseTemp = 37.0;
         const tempDrift = 1.2 * Math.sin(t * 0.1);
         const tempNoise = noise * (Math.random() - 0.5) * 0.8;
-        const nextTemp = ch.temp ? baseTemp + tempDrift + tempNoise : prev.temp;
+        const nextTemp = ch.temp ? baseTemp + tempDrift + tempNoise : prevMetrics.temp;
 
         // pH Level: slow metabolic acid drift
         const basePh = 7.40;
         const phDrift = 0.08 * Math.sin(t * 0.05 + 1.0);
         const phNoise = noise * (Math.random() - 0.5) * 0.05;
-        const nextPh = ch.ph ? basePh + phDrift + phNoise : prev.ph;
+        const nextPh = ch.ph ? basePh + phDrift + phNoise : prevMetrics.ph;
 
         // Dissolved Oxygen: depletion sine wave
         const baseOxygen = 95.0;
         const oxyDrift = 4.0 * Math.sin(t * 0.08 + 2.0);
         const oxyNoise = noise * (Math.random() - 0.5) * 1.5;
-        const nextOxygen = ch.oxygen ? baseOxygen + oxyDrift + oxyNoise : prev.oxygen;
+        const nextOxygen = ch.oxygen ? baseOxygen + oxyDrift + oxyNoise : prevMetrics.oxygen;
 
         // Chamber Pressure: pump cycle
         const basePressure = 120.0;
         const pressCycle = 15.0 * Math.sin(t * 2.5);
         const pressNoise = noise * (Math.random() - 0.5) * 4.0;
-        const nextPressure = ch.pressure ? basePressure + pressCycle + pressNoise : prev.pressure;
+        const nextPressure = ch.pressure ? basePressure + pressCycle + pressNoise : prevMetrics.pressure;
 
         // --- Automotive Simulation ---
         // Throttle and brake driver input pedal loops
@@ -224,7 +234,7 @@ export function useTelemetry() {
         const speedNoise = noise * (Math.random() - 0.5) * 3.0;
         const speedLag = 0.95; // speed inertia
         const nextSpeed = ch.speed 
-          ? Math.max(0, Math.min(240, prev.speed * speedLag + targetSpeed * (1 - speedLag) - (nextBrake * 0.1) + speedNoise))
+          ? Math.max(0, Math.min(240, prevMetrics.speed * speedLag + targetSpeed * (1 - speedLag) - (nextBrake * 0.1) + speedNoise))
           : 0;
 
         // --- Log threshold warnings dynamically (throttled/periodic) ---
@@ -234,13 +244,22 @@ export function useTelemetry() {
           if (nextRpm > 6500) addLog("warning", `Automotive WARNING // Engine redline threshold: ${nextRpm.toFixed(0)} RPM`);
         }
 
-        // Update historical buffers
-        setHistory((prevHistory) => {
-          const updateBuffer = (buffer: number[], val: number) => {
-            return [...buffer.slice(1), val];
-          };
+        const updateBuffer = (buffer: number[], val: number) => {
+          return [...buffer.slice(1), val];
+        };
 
-          return {
+        return {
+          metrics: {
+            temp: nextTemp,
+            ph: nextPh,
+            oxygen: nextOxygen,
+            pressure: nextPressure,
+            rpm: nextRpm,
+            speed: nextSpeed,
+            throttle: nextThrottle,
+            brake: nextBrake,
+          },
+          history: {
             temp: updateBuffer(prevHistory.temp, nextTemp),
             ph: updateBuffer(prevHistory.ph, nextPh),
             oxygen: updateBuffer(prevHistory.oxygen, nextOxygen),
@@ -249,18 +268,7 @@ export function useTelemetry() {
             speed: updateBuffer(prevHistory.speed, nextSpeed),
             throttle: updateBuffer(prevHistory.throttle, nextThrottle),
             brake: updateBuffer(prevHistory.brake, nextBrake),
-          };
-        });
-
-        return {
-          temp: nextTemp,
-          ph: nextPh,
-          oxygen: nextOxygen,
-          pressure: nextPressure,
-          rpm: nextRpm,
-          speed: nextSpeed,
-          throttle: nextThrottle,
-          brake: nextBrake,
+          },
         };
       });
 
@@ -285,18 +293,7 @@ export function useTelemetry() {
     addLog("info", `Diagnostic channel toggled: ${String(channel).toUpperCase()} is now ${!activeChannels[channel] ? "ACTIVE" : "MUTED"}`);
   };
 
-  const getStats = (buffer: number[]) => {
-    if (buffer.length === 0) return { min: 0, max: 0, avg: 0 };
-    const validPoints = buffer.filter((v) => !isNaN(v));
-    if (validPoints.length === 0) return { min: 0, max: 0, avg: 0 };
 
-    const min = Math.min(...validPoints);
-    const max = Math.max(...validPoints);
-    const sum = validPoints.reduce((s, v) => s + v, 0);
-    const avg = sum / validPoints.length;
-
-    return { min, max, avg };
-  };
 
   const getChannelStatus = (
     channel: "temp" | "ph" | "oxygen" | "pressure" | "rpm" | "speed" | "throttle" | "brake",
