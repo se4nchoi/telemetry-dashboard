@@ -49,15 +49,19 @@ export async function POST(request: NextRequest) {
     const logPath = path.join(process.cwd(), "telemetry_loss.log");
     const timestampStr = new Date().toISOString();
     
-    if (incomingPacketId > latestTelemetry.packetId + 1 && latestTelemetry.packetId !== 0) {
-      const gap = incomingPacketId - latestTelemetry.packetId - 1;
-      const lossLog = `[${timestampStr}] [CRITICAL] Sequence gap detected: expected #${latestTelemetry.packetId + 1}, received #${incomingPacketId} (${gap} frames lost)\n`;
-      fs.appendFileSync(logPath, lossLog);
-    }
+    try {
+      if (incomingPacketId > latestTelemetry.packetId + 1 && latestTelemetry.packetId !== 0) {
+        const gap = incomingPacketId - latestTelemetry.packetId - 1;
+        const lossLog = `[${timestampStr}] [CRITICAL] Sequence gap detected: expected #${latestTelemetry.packetId + 1}, received #${incomingPacketId} (${gap} frames lost)\n`;
+        await fs.promises.appendFile(logPath, lossLog);
+      }
 
-    // Append standard telemetry ledger log
-    const receiptLog = `[${timestampStr}] [INFO] Packet #${incomingPacketId} received successfully (Temp: ${temp.toFixed(1)}, pH: ${ph.toFixed(2)}, Oxy: ${oxygen.toFixed(1)}, Pres: ${pressure.toFixed(0)})\n`;
-    fs.appendFileSync(logPath, receiptLog);
+      // Append standard telemetry ledger log
+      const receiptLog = `[${timestampStr}] [INFO] Packet #${incomingPacketId} received successfully (Temp: ${temp.toFixed(1)}, pH: ${ph.toFixed(2)}, Oxy: ${oxygen.toFixed(1)}, Pres: ${pressure.toFixed(0)})\n`;
+      await fs.promises.appendFile(logPath, receiptLog);
+    } catch (fsError) {
+      console.warn("Telemetry file write skipped (possibly read-only filesystem):", fsError);
+    }
 
     // Update in-memory telemetry cache
     latestTelemetry = {
