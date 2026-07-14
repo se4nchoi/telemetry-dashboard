@@ -2,7 +2,6 @@
 
 A real-time monitoring dashboard built with Next.js and TypeScript for visualizing simulated operational telemetry across biotech and automotive scenarios.
 
-<!-- Optional badges -->
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
@@ -34,7 +33,7 @@ A real-time monitoring dashboard built with Next.js and TypeScript for visualizi
 
 ## System Status
 
-The application evaluates both telemetry values and simulated communication reliability with simulation.
+The application evaluates both telemetry values and simulated communication reliability.
 
 The overall system can report:
 
@@ -154,7 +153,6 @@ This repository should be treated as an exploratory telemetry-dashboard prototyp
 - Add persistent event storage and configurable alert thresholds
   
 ## What I Explored
-
 This project was built through an AI-assisted development workflow. While much of the frontend implementation was generated with Antigravity, I directed the project’s behavior, interaction design, and architectural evolution through iterative prompting, review, and testing.
 
 Key ideas I explored included:
