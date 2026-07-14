@@ -52,9 +52,7 @@ Packet loss is calculated using the number of received and missed packets.
 * TypeScript
 * Tailwind CSS
 * React Context
-* Custom React hooks
 * Vitest
-* ESLint
 
 ## Architecture
 
@@ -66,7 +64,7 @@ useTelemetry hook
             ↓
 TelemetryContext
             ↓
-Rendered React.js Components
+Reusable dashboard components and charts
 ```
 
 ## Project Structure
@@ -142,39 +140,35 @@ The project currently focuses on frontend telemetry simulation and monitoring-in
 
 It does not yet include:
 
-* Physical sensor or STM32 integration
-* CAN, MQTT, WebSocket, or OPC UA communication
-* A production backend
-* Persistent telemetry storage
-* Authentication or role-based access
-* Event and alarm history
-* Production alert delivery
-* Automated anomaly detection
+- Physical sensor or STM32 integration
+- External communication through CAN, MQTT, WebSocket, or OPC UA
+- A production backend with persistent telemetry and event storage
+- Production features such as authentication, alerts, and anomaly detection
 
 This repository should be treated as an exploratory telemetry-dashboard prototype rather than a production monitoring system.
 
 ## Roadmap
 
-* Replace simulated telemetry with WebSocket or MQTT data
-* Connect the dashboard to an STM32-based sensor system
-* Add persistent telemetry and event storage
-* Add configurable alert thresholds
-* Record alarm and fault history
-* Support multiple machines or process lines
-* Experiment with anomaly detection and predictive maintenance
-
+- Replace simulated telemetry with WebSocket or MQTT data
+- Connect the dashboard to an STM32-based sensor source
+- Add persistent event storage and configurable alert thresholds
+  
 ## What I Explored
 
-Through this project, I explored:
+This project was built through an AI-assisted development workflow. While much of the frontend implementation was generated with Antigravity, I directed the project’s behavior, interaction design, and architectural evolution through iterative prompting, review, and testing.
 
-* Translating operational data into a usable monitoring interface
-* Managing shared real-time state with React Context and custom hooks
-* Maintaining rolling telemetry history
-* Calculating live summary statistics
-* Representing nominal, warning, fault, and offline states
-* Combining sensor conditions with packet reliability
-* Designing reusable components for multiple operational scenarios
-* Connecting my full-stack background with industrial monitoring concepts
+Key ideas I explored included:
+
+* Designing draggable metric cards so users can reorganize the monitoring interface
+* Treating simulated packet loss as an operational fault signal rather than a purely visual metric
+* Representing nominal, warning, fault, and offline system states
+* Adding light and dark display modes for different monitoring environments
+* Refactoring the dashboard around shared React Context state
+* Reusing the same telemetry architecture across automotive and biotech scenarios
+* Separating reusable dashboard components from scenario-specific labels, ranges, and content
+* Evaluating where AI-generated implementation still required clearer requirements, testing, and architectural direction
+
+The project gave me practical experience in directing an AI coding agent, reviewing the resulting system behavior, and turning an initial interface concept into a more reusable telemetry-dashboard architecture.
 
 ## Feedback
 
