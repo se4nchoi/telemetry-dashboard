@@ -23,7 +23,7 @@ A real-time monitoring dashboard built with Next.js and TypeScript for visualizi
 * Current, minimum, maximum, and average values
 * Nominal, warning, danger, and offline states
 * Overall system-health calculation
-* Packet-loss tracking and fault detection
+* Simulated packet-gap tracking and threshold-based status indicators
 * Per-channel visibility controls
 * Drag-and-drop metric card ordering
 * Reusable dashboard components across multiple monitoring scenarios
@@ -42,7 +42,7 @@ The overall system can report:
 * **Fault Detected** — a channel enters a danger state or packet loss exceeds the fault threshold
 * **Offline** — the telemetry connection is disabled
 
-Packet loss is calculated using the number of received and missed packets.
+Simulated packet IDs let the hook detect sequence gaps when a later packet arrives. The displayed loss percentage is a prototype indicator; it has not been validated as a network-reliability measurement.
 
 ## Tech Stack
 
@@ -66,26 +66,30 @@ TelemetryContext
 Reusable dashboard components and charts
 ```
 
+A separate `GET`/`POST /api/telemetry` route accepts numeric biotech readings, keeps the latest frame in memory, and attempts to append receipt and sequence-gap logs to `telemetry_loss.log`. The dashboard hook does not consume this endpoint yet; its displayed data still comes from the client-side simulation.
+
 ## Project Structure
 
 ```text
-app/
-├── page.tsx
-├── biotech/
-│   └── page.tsx
-└── vehicle/
-    └── page.tsx
-
-components/
-├── DashboardShell.tsx
-├── MetricCard.tsx
-└── TelemetryChart.tsx
-
-context/
-└── TelemetryContext.tsx
-
-hooks/
-└── useTelemetry.ts
+src/
+├── app/
+│   ├── page.tsx
+│   ├── biotech/page.tsx
+│   ├── automotive/page.tsx
+│   └── api/telemetry/
+│       ├── route.ts
+│       └── route.test.ts
+├── components/
+│   ├── DashboardShell.tsx
+│   ├── MetricCard.tsx
+│   └── TelemetryChart.tsx
+├── context/
+│   └── TelemetryContext.tsx
+├── hooks/
+│   └── useTelemetry.ts
+└── utils/
+    ├── telemetryHelpers.ts
+    └── telemetryHelpers.test.ts
 ```
 
 ## Local Setup
@@ -114,6 +118,14 @@ http://localhost:3000
 ```
 
 The root route redirects to the default biotech monitoring view.
+
+### Tests
+
+```bash
+npm test
+```
+
+The Vitest suite covers telemetry math helpers and the API route's initial response, input validation, and receipt logging. It does not validate physical hardware or the complete dashboard interaction flow.
 
 ### Production Build
 
@@ -152,21 +164,10 @@ This repository should be treated as an exploratory telemetry-dashboard prototyp
 - Connect the dashboard to an STM32-based sensor source
 - Add persistent event storage and configurable alert thresholds
   
-## What I Explored
-This project was built through an AI-assisted development workflow. While much of the frontend implementation was generated with Antigravity, I directed the project’s behavior, interaction design, and architectural evolution through iterative prompting, review, and testing.
+## My Contribution and AI Assistance
+I defined the monitoring behavior and interaction design, then used Antigravity for much of the frontend implementation. My work included iterative prompting, code review, behavior checks, and directing the move to shared React Context state.
 
-Key ideas I explored included:
-
-* Designing draggable metric cards so users can reorganize the monitoring interface
-* Treating simulated packet loss as an operational fault signal rather than a purely visual metric
-* Representing nominal, warning, fault, and offline system states
-* Adding light and dark display modes for different monitoring environments
-* Refactoring the dashboard around shared React Context state
-* Reusing the same telemetry architecture across automotive and biotech scenarios
-* Separating reusable dashboard components from scenario-specific labels, ranges, and content
-* Evaluating where AI-generated implementation still required clearer requirements, testing, and architectural direction
-
-The project gave me practical experience in directing an AI coding agent, reviewing the resulting system behavior, and turning an initial interface concept into a more reusable telemetry-dashboard architecture.
+The main design decisions were reusable components across biotech and automotive scenarios, draggable metric cards, light and dark themes, and using simulated packet gaps alongside channel thresholds to communicate system status.
 
 ## Feedback
 
